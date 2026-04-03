@@ -35,12 +35,14 @@ void insert_node(TreeNode *root,const int value) {
             insert_node(root->left, value);
         } else {
             root->left = createNode(value);
+            root->left->parent = root;
         }
     } else {
         if (root->right != nullptr) {
             insert_node(root->right, value);
         } else {
             root->right = createNode(value);
+            root->right->parent = root;
         }
     }
 }
@@ -56,21 +58,25 @@ void insert(BinarySearchTree *tree, const int value) {
         insert_node(tree->root, value);
     }
 }
-
-bool search_branch(const TreeNode *current,const int value) {
-    if (current == nullptr) {
-        return false;
+TreeNode* find_tree_node(BinarySearchTree *tree, const int value) {
+    if (tree->root == nullptr) {
+        return nullptr;
     }
+    return search_branch(tree->root, value);
+}
 
-    if (current->data == value) {
-        return true;
+TreeNode* search_branch(TreeNode *current,const int value) {
+
+    TreeNode *tree = current;
+    while (tree != nullptr && value != tree->data) {
+        if (value < tree->data) {
+            tree = tree->left;
+        }
+        else {
+            tree = tree->right;
+        }
     }
-
-    if (value < current->data) {
-        return search_branch(current->left, value);
-    }
-
-    return search_branch(current->right, value);
+    return tree;
 }
 
 bool search(const BinarySearchTree *tree,const int value) {
@@ -131,4 +137,66 @@ void print_branch(const TreeNode * node, char * prefix, const bool is_left) {
         }
 
     }
+}
+
+void delete_node(BinarySearchTree * tree, TreeNode * node) {
+
+    if (tree->root == nullptr || node == nullptr) {
+        return;
+    }
+
+    if (node->left == nullptr && node->right == nullptr) {
+        if (node->parent == nullptr) {
+            tree->root = nullptr;
+        }
+        else if (node->parent->left == node) {
+            node->parent->left = nullptr;
+        }
+        else {
+            node->parent->right = nullptr;
+        }
+    }
+    else if (node->left == nullptr || node->right == nullptr) {
+        TreeNode * temp = node->left;
+        if (node->left == nullptr) {
+            temp = node->right;
+        }
+        temp->parent = node->parent;
+        if (node->parent == nullptr) {
+            tree->root = temp;
+        }
+        else if (node->parent->left == node) {
+            node->parent->left = temp;
+        }
+        else {
+            node->parent->right = temp;
+        }
+    }
+    else {
+        TreeNode * temp = node->right;
+        while (temp->left != nullptr) {
+            temp = temp->left;
+        }
+        delete_node(tree, temp);
+
+        if (node->parent == nullptr) {
+            tree->root = temp;
+        }
+        else if (node->parent->left == node) {
+            node->parent->left = temp;
+        }
+        else {
+            node->parent->right = temp;
+        }
+
+        temp->parent = node->parent;
+        temp->left = node->left;
+        node->left->parent = temp;
+        temp->right = node->right;
+
+        if (node->right == nullptr) {
+            node->right->parent = temp;
+        }
+    }
+    //free(node);
 }

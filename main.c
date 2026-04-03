@@ -15,10 +15,11 @@ int main(void) {
     insert(firstTree, 72);
     insert(firstTree, 12);
     insert(firstTree, 10);
-    if (search(firstTree, 97)) {
-        printf("This works!\n");
-    }
+
     print_tree(firstTree);
+    delete_node(firstTree, find_tree_node(firstTree, 65));
+    print_tree(firstTree);
+
     free_tree(firstTree->root);
     return EXIT_SUCCESS;
 }
